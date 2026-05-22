@@ -2,16 +2,16 @@ import logging
 import csv
 import os
 from datetime import datetime
-from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler,
     filters, ContextTypes, ConversationHandler
 )
 
 # ─────────────────────────────────────────
-BOT_TOKEN   = "8922098628:AAE5gq7vfarfC5S0W4FdX1agwIi83ZpIdjo"
-PDF_PATH    = "25_активаций_к_лету_для_вашего_бизнеса.pdf"
-CSV_FILE    = "clients.csv"
+BOT_TOKEN = "8922098628:AAE5gq7vfarfC5S0W4FdX1agwIi83ZpIdjo"
+PDF_PATH  = "guide.pdf"
+CSV_FILE  = "clients.csv"
 # ─────────────────────────────────────────
 
 ASK_NICHE = 1
@@ -62,16 +62,16 @@ async def ask_niche(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"✅ Новый клиент: {user.full_name} (@{user.username}), ниша: {niche}")
 
     await update.message.reply_text(
-        f"Отлично! 🔥 Держи свой гайд 👇",
+        "Отлично! 🔥 Отправляю файл... ⏳",
         reply_markup=ReplyKeyboardRemove()
     )
 
     with open(PDF_PATH, "rb") as pdf_file:
         await update.message.reply_document(
             document=pdf_file,
-            caption="«25 активаций к лету для бизнеса» от Brand Health Clinic 🌿\n\nЕсли захочешь разработать активацию или экспресс-стратегию под свой бренд — пиши в директ @bhc_buro или в тг @bhcaccount 💬",
-            read_timeout=60,
-            write_timeout=60,
+            caption="«25 активаций к лету для бизнеса» от Brand Health Clinic 🌿\n\nХочешь разработать активацию или экспресс-стратегию под свой бренд? Пиши в директ @bhc_buro или в тг @bhcaccount 💬",
+            read_timeout=120,
+            write_timeout=120,
             connect_timeout=60,
         )
 
@@ -79,9 +79,7 @@ async def ask_niche(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def fallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Напиши /start чтобы начать 😊"
-    )
+    await update.message.reply_text("Напиши /start чтобы начать 😊")
 
 
 def main():
