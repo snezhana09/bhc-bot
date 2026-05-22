@@ -9,9 +9,10 @@ from telegram.ext import (
 )
 
 # ─────────────────────────────────────────
-BOT_TOKEN = "8922098628:AAE5gq7vfarfC5S0W4FdX1agwIi83ZpIdjo"
-PDF_PATH  = "guide.pdf"
-CSV_FILE  = "clients.csv"
+BOT_TOKEN  = "8922098628:AAE5gq7vfarfC5S0W4FdX1agwIi83ZpIdjo"
+PDF_PATH   = "guide.pdf"
+CSV_FILE   = "clients.csv"
+ADMIN_USERNAME = "snmgk0"  # без @
 # ─────────────────────────────────────────
 
 ASK_NICHE = 1
@@ -78,6 +79,35 @@ async def ask_niche(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+async def clients(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user.username != ADMIN_USERNAME:
+        await update.message.reply_text("⛔ У тебя нет доступа к этой команде.")
+        return
+
+    if not os.path.isfile(CSV_FILE):
+        await update.message.reply_text("Пока нет ни одного клиента.")
+        return
+
+    with open(CSV_FILE, "r", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+
+    if len(rows) <= 1:
+        await update.message.reply_text("Пока нет ни одного клиента.")
+        return
+
+    text = "📋 *Список клиентов:*\n\n"
+    for row in rows[1:]:
+        date, uid, username, name, niche = row
+        text += f"👤 {name} {username}\n🗂 {niche} | 📅 {date}\n\n"
+
+    # Telegram ограничивает сообщения 4096 символами
+    if len(text) > 4000:
+        text = text[:4000] + "\n\n...и ещё есть. Скоро сделаю выгрузку файлом."
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
 async def fallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Напиши /start чтобы начать 😊")
 
@@ -94,6 +124,7 @@ def main():
     )
 
     app.add_handler(conv)
+    app.add_handler(CommandHandler("clients", clients))
     logging.info("🤖 Бот запущен...")
     app.run_polling(close_loop=False)
 
